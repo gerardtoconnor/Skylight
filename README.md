@@ -20,13 +20,18 @@ type Person = {
     mutable Address : string
 }
 ```
-Now that we have a model, we can deifine our view
+Note properties need to be mutable in order to enable the app to update them.
+
+Now that we have a model, we can deifine our view:
 ```f#
-let mainView model =
+let mainView model = // a render function
     stackpanel {
         children [
-            label { content <@ model.Name @> }
-            label { content (<@ model.Age @>,fun ()-> string model.Age }
+            // simple bind
+            label { content <@ model.Name @> }   
+            // bind with map (int -> string)
+            label { content (<@ model.Age @>,fun ()-> string model.Age) }
+            // another simple bind
             label { content <@ model.Address @> }
         ]
     }

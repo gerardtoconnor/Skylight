@@ -1,5 +1,5 @@
 # Skylight
-A composable high level window library for F# and WPF to explore using Computation Expression UI.
+A composable high level window library for F# and WPF to explore using Computation Expression UI, rather then Xaml.
 
 ![](./icon.png)
 
@@ -27,7 +27,7 @@ Note properties need to be mutable in order to enable the app to update them.
 Now that we have a model, we can define our view:
 ```f#
 let mainView model = // a render function
-    stackpanel {
+    stackPanel {
         children [
             // simple bind
             label { content <@ model.Name @> }   
@@ -63,9 +63,6 @@ On these controls there are essentially two types of operations:
 
 Property bindings will just get and set properties of controls and your model, mapping where needed, while the actions and functionality of the application will be driven by events. Multiple overloads on the various Property and Event Bindings will allow us to model differnt interactions with the UI and model.
 
-## Resources/Styling
-The application can load a resource dictionary with required styling if wanted, but for this initial release, I have left our styling and looked purely at functionality.
-
 ## Property Setting
 For one time property setting on a UI Control, that does not need to watch a model property, you can just pass a value into the operation
 ```fsharp
@@ -81,6 +78,8 @@ textBox { text (<@ model.Age @>,fun i -> string i,fun str -> Int32.Parse str) }
 // or simply
 textBox { text (<@ model.Age @>,string,Int32.Parse) }
 ```  
+For properties with only a getter, only one map is required.
+
 ## Event Binding
 You can bind to most of the events found on controls, for clarity, all the operation names are prepended with `on` so that the `Click` event is called with the `onClick` operation:
 ```fsharp
@@ -105,7 +104,7 @@ type Work =
 | Idle
 | Working of CancellationTokenSource
 ```
-Now event bindings that first target a binding expression of `Work` can manage the `Task`, providing a CancelationToken (in addition to sender & event args), and allowing binding returns when used with `TaskBuilder.fs` CE
+Now event bindings that first target a binding expression of `Work` can manage the `Task`, providing a CancellationToken (in addition to sender & event args), and allowing binding returns when used with `TaskBuilder.fs` CE
 ```fsharp
 let work = ref Idle //a scoped view-model ref variable
 button { onClick (<@ work.Value @>,<@ model.Name @>,
@@ -118,11 +117,31 @@ button { onClick (<@ work.Value @>,<@ model.Name @>,
 ```
 
 ## Collections
-Despite re-inventing the wheel everywhere else, i decidede to use `ObservableCollection` for collections, with type abbreviation `OSeq`. `OSeq` will natively bind to `ItemsControls`, or specifically, the `items` operation on controls that support it. 
+Despite re-inventing the wheel everywhere else, I decided to use `ObservableCollection` for collections, with type abbreviation `OSeq`. `OSeq` will natively bind to `ItemsControls`, eg the `items` operation on items controls. Given we are mutating the collection, and not changing the reference, we do not need/use quotations. 
 ```fsharp
-type Model = { Items:OSeq<string> }
+type Model = { Items:OSeq<string> ; Selected:obj }
+let model = { Items = OSeq(["Jan";"Feb";"Mar"]) ; Selected = null }
 listBox {
-    items (<@ model.Items @>,fun (v:string) -> label { content v } |> View )
-    selectedItem <@ model.Selected @>`
-            }
+    items (model.Items,fun (v:string) -> label { content v } )
+    selectedItem <@ model.Selected @>
+}
 ```
+The following will render a template of `label { content v }` for each value in the collection, and track the addition/removals to keep view in sync. The bindings for each child view are managed and disposed correctly by the operation binding.
+
+## Binding Child Views
+An important critical feature of the applications composability and efficiency is that it's `Views` are created and disposed of correctly, where `Views` are scoped groupings of controls and bindings mapped to a specific model. Views can be bound to a VM property such that a child view can be spawned in the mapping, and dispose of the prior child if needed.
+```fsharp
+let childView1 model = ...
+let childView2 model = ...
+let view = ref (childView1 model)
+stackPanel {
+    add <@ view.Value @> // binding view allows swapping views
+    add (button {
+        content "set to child 2"
+        onClick (<@ view.Value @>),fun _ _ -> childView2 model)
+    }) 
+}
+```
+
+## Resources/Styling
+The application can load a resource dictionary with required styling if wanted, but for this initial release, I have left our styling and looked purely at functionality.

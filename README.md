@@ -155,3 +155,33 @@ stackPanel {
 
 ## Resources/Styling
 The application can load a resource dictionary with required styling if wanted, but for this initial release, I have left our styling and looked purely at functionality.
+
+## Hacky Demo Application
+If you look in Program.fs, you can see a very messy hacky UI I built to test the functionality and binding, I'm sure it's missing a ton of controls/operations but it works nicely as a proof of concept. To run you need to open sln in VS, and restore nuget packages before running.
+```fsharp
+let mainView model = ...
+
+[<EntryPoint;STAThread>]
+let main argv = 
+    
+    let model = { 
+        Message = "Hello" 
+        FontSize = 12.
+        Items = OSeq(["January";"February";"March"])
+        Selected = null
+        VariableCount = 0 
+        Submodel = { 
+            Value1 = "SubModel Value1" 
+            Counter = 0  
+            MyRow = 0
+            MyCol = 0
+        }
+    }
+    
+    window {
+        title "Ger's App"
+        height 720.
+        width 520.
+        content (mainView model)
+    } |> Application().Run
+```

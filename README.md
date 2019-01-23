@@ -4,9 +4,9 @@ A composable high level window library for F# and WPF to explore using Computati
 ![](./icon.png)
 
 ## Summary
-Skylight is a basic, proof of concept library built on top of WPF and F# Computation Expressions to allow building of composable UI for windows. 
+Skylight is a basic, proof of concept library built on top of WPF and F# Computation Expressions to allow building of composable UI for windows. It will only provide basic functionality for basic UI.
 
-__Skylight is not even an alpha and not intended for production as much functionality is missing__
+__!! Skylight is not even an alpha and not intended for production as much functionality is missing !!__
 
 The model is a hybrid of both MVVM and Elmish MVU, where a model is mapped into a view like MVU, but it is only done once on the initial render, with all subsequent updates propegating through targeted bindings. The targeted updates of model properties requires the model to be mutable, and the targets are defined using FSharp Quotations eg `<@ model.Property @>`.
 
@@ -128,17 +128,27 @@ listBox {
 ```
 The following will render a template of `label { content v }` for each value in the collection, and track the addition/removals to keep view in sync. The bindings for each child view are managed and disposed correctly by the operation binding.
 
+`Panels` like `Grid`, `WrapPanel` and `StackPanel` can also bind `ObservableCollections` to thier children operation to allow
+```fsharp
+type Model = { Items:OSeq<string> }
+let model = { Items = OSeq(["Jan";"Feb";"Mar"]) }
+stackPanel {
+    childern (model.Items,fun (v:string) -> label { content v } )
+}
+```
+
 ## Binding Child Views
-An important critical feature of the applications composability and efficiency is that it's `Views` are created and disposed of correctly, where `Views` are scoped groupings of controls and bindings mapped to a specific model. Views can be bound to a VM property such that a child view can be spawned in the mapping, and dispose of the prior child if needed.
+An important critical feature of the applications composability and efficiency is that it's `Views` are created and disposed of correctly, where `Views` are scoped groupings of controls and bindings mapped to a specific model. Views can be bound to a VM property such that a child view can be spawned in the mapping, and dispose of the prior child as appropriate.
 ```fsharp
 let childView1 model = ...
 let childView2 model = ...
 let view = ref (childView1 model)
 stackPanel {
     add <@ view.Value @> // binding view allows swapping views
-    add (button {
-        content "set to child 2"
-        onClick (<@ view.Value @>),fun _ _ -> childView2 model)
+    add ( 
+        button {
+            content "set to child 2"
+            onClick (<@ view.Value @>),fun _ _ -> childView2 model)
     }) 
 }
 ```

@@ -6,7 +6,7 @@ A composable high level window library for F# and WPF to explore using Computati
 ## Summary
 Skylight is a basic, proof of concept library built on top of WPF and F# Computation Expressions to allow building of composable UI for windows. It will only provide basic functionality for basic UI.
 
-__!! Skylight is not even an alpha and not intended for production as much functionality is missing !!__
+__!! Skylight is not even an alpha, just a jumping off point and not intended for production as much functionality is missing / flakey !!__
 
 The model is a hybrid of both MVVM and Elmish MVU, where a model is mapped into a view like MVU, but it is only done once on the initial render, with all subsequent updates propegating through targeted bindings. The targeted updates of model properties requires the model to be mutable, and the targets are defined using FSharp Quotations eg `<@ model.Property @>`.
 

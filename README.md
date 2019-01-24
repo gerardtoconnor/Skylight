@@ -10,8 +10,7 @@ __!! Skylight is not even an alpha, just a jumping off point and not intended fo
 
 The model is a hybrid of both MVVM and Elmish MVU, where a model is mapped into a view like MVU, but it is only done once on the initial render, with all subsequent updates propegating through targeted bindings. The targeted updates of model properties requires the model to be mutable, and the targets are defined using FSharp Quotations eg `<@ model.Property @>`.
 
-In order to an update properties, and ensure they pass through the binding infrastrucutre, properties are never set directly like `model.Property <- value` as this will only update the model, not propegate it through the UI. All binding/mapping functions will allow you to return a value, and this will set the target property given by a FSharp Quotation `(<@ model.Prop @>,fun () -> "myValue")`
-to allow multiple updates, there are overloads for these funtions eg `<@ model.P1 @>,<@ model.P2 @>,fun () -> "P1Value" , "P2Value")`.
+In order to an update properties, and ensure they pass through the binding infrastrucutre, properties are never set directly like `model.Property <- value` as this will only update the model, not propegate it through the UI. All binding/mapping functions will allow you to return a value, and this will set the target property given by a FSharp Quotation `(<@ model.Prop @>,fun _ _ -> "myValue")` to allow multiple updates, there are overloads for these funtions eg `<@ model.P1 @>,<@ model.P2 @>,fun _ _ -> "P1Value" , "P2Value")`.
 
 ## The Model
 We define our model with F# records like:
@@ -32,7 +31,7 @@ let mainView model = // a render function
             // simple bind
             label { content <@ model.Name @> }   
             // bind with map (int -> string)
-            label { content (<@ model.Age @>,fun ()-> string model.Age) }
+            label { content (<@ model.Age @>,fun i -> string i) }
             // another simple bind
             label { content <@ model.Address @> }
         ]

@@ -171,7 +171,7 @@ let mainView (model:MyModel) =
             }
         )
     }
-    
+
 
 [<EntryPoint;STAThread>]
 let main argv = 

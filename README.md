@@ -13,7 +13,7 @@ A composable high level window library for F# and WPF to explore using Computati
 - [Binding Child Views](#Binding-Child-Views)
 - [Resources/Styling](#Resources/Styling)
 - [Hacky Demo Application](#Hacky-Demo-Application)
-- [Next Steps / Todo](#Next-Steps-/-Todo)
+- [Next Steps / Todo](#Next-Steps--Todo)
 
 
 ## Summary

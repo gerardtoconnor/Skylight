@@ -3,14 +3,29 @@ A composable high level window library for F# and WPF to explore using Computati
 
 ![](./icon.png)
 
+## Contents
+- [Summary](#Summary)
+- [The Model](#The-Model)
+- [Property Setting](#Property-Setting)
+- [Property Binding](#Property-Binding)
+- [Event Binding](#Event-Binding)
+- [Collections](#Collections)
+- [Binding Child Views](#Binding-Child-Views)
+- [Resources/Styling](#Resources/Styling)
+- [Hacky Demo Application](#Hacky-Demo-Application)
+- [Next Steps / Todo](#Next-Steps-/-Todo)
+
+
 ## Summary
 Skylight is a basic, proof of concept library built on top of WPF and F# Computation Expressions to allow building of composable UI for windows. It will only provide basic functionality for basic UI.
 
 __!! Skylight is not even an alpha, just a jumping off point and not intended for production as much functionality is missing / flakey !!__
 
-The model is a hybrid of both MVVM and Elmish MVU, where a model is mapped into a view like MVU, but it is only done once on the initial render, with all subsequent updates propegating through targeted bindings. The targeted updates of model properties requires the model to be mutable, and the targets are defined using FSharp Quotations eg `<@ model.Property @>`.
+The model is a hybrid of both MVVM and Elmish MVU, where a model is mapped into a view like MVU, but it is only done once on the initial render, with all subsequent updates propegating through targeted bindings. The targeted updates of model properties requires the model to be mutable as UI updates automatically propegate through to model, and the targets are defined using FSharp Quotations eg `<@ model.Property @>`.
 
 In order to an update properties, and ensure they pass through the binding infrastrucutre, properties are never set directly like `model.Property <- value` as this will only update the model, not propegate it through the UI. All binding/mapping functions will allow you to return a value, and this will set the target property given by a FSharp Quotation `(<@ model.Prop @>,fun _ _ -> "myValue")` to allow multiple updates, there are overloads for these funtions eg `<@ model.P1 @>,<@ model.P2 @>,fun _ _ -> "P1Value" , "P2Value")`.
+
+All property bind operations are following a basic pattern of
 
 ## The Model
 We define our model with F# records like:
@@ -69,7 +84,7 @@ textbox { text "static text value" }
 ``` 
 
 ## Property Binding
-The common pattern for property  binding will be to provide model property targets, via FSharp Quotations, and then functions for mapping if needed. The quotation captures the model instance as well as building a lambda to get/set the property for the binding model.
+The common pattern for property binding will be to provide model property targets, via FSharp Quotations, and then functions for mapping if needed. The quotation captures the model instance as well as building a lambda to get/set the property for the binding model. __The model is mutable to allow that updates to the control eg a Textbox's Text property, will be automatically pushed into the property when the control values changes from user input__, in MVU you need to manually attach events for every single control, to transmit a message, to update model... which I am not a fan of. Skylight binding is also binding to updates when ever the control property is updated externally.
 ```fsharp
 label { content <@ model.Name @> } 
 
@@ -184,3 +199,11 @@ let main argv =
         content (mainView model)
     } |> Application().Run
 ```
+## Next Steps / Todo
+There are many things missing, including controls which I hope to impliment in the coming itterations
+- Add additional missing controls
+- Add optional overload to event operations to accept a dispatch function that will allow message passing to parent model
+- Add control/pattern for adding in custom events, so sockets etc can integrate seemlessly.
+- Investigate benefit of immutable model and how to automate the copying `with` properties for automated updating from events
+  - Many think the immutable model is far better but given I want control properties to automatically propergate updates back into the model, I would need to find an efficient, performant way to do it progrmatically as I do not want to have users have to manually wire up events, for messages, just to update a property.
+  - Being a staticly typed languge, with update patterns available at compile time, I would not look to do a traditional diff, but instead, a targeted, scoped diff, aided by compile time analysis of transforms.
